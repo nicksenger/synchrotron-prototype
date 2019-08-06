@@ -1,0 +1,32 @@
+.page__text-anchor {
+  @include code-face();
+  font-weight: 700;
+  font-size: 1em;
+  position: absolute;
+  z-index: 5;
+  color: $blue;
+  cursor: pointer;
+  transform: translate(0%, -50%);
+  &:hover {
+      color: $darker-blue;
+  }
+  &:before {
+      content: "\A";
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: $blue;
+      display: inline-block;
+      vertical-align: middle;
+      @include margin-right-fraction(3);
+  }
+  @media (max-width: 1200px) {
+      font-size: 0.8em;
+  }
+  @media (max-width: 800px) {
+      font-size: 0.6em;
+  }
+  @media (max-width: 400px) {
+      font-size: 0.4em;
+  }
+}
