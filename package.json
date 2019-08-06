@@ -28,6 +28,9 @@
     "fluorophore": "^1.1.1",
     "postcss-loader": "^3.0.0",
     "sass-loader": "^7.1.0",
+    "ts-loader": "^6.0.4",
+    "tslint": "^5.18.0",
+    "typescript": "^3.5.3",
     "webpack": "^4.39.1",
     "webpack-cli": "^3.3.6",
     "webpack-dev-server": "^3.7.2"

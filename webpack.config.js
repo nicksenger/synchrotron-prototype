@@ -4,7 +4,7 @@ const path = require('path');
 module.exports = {
     entry: {
         bundle: ['./src/Main.elm', './src/styles/index.scss'],
-        sw: './src/sw.elm'
+        sw: './src/sw.ts'
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -14,11 +14,13 @@ module.exports = {
     devtool: 'source-map',
 
     resolve: {
-        extensions: ['.elm', '.scss']
+        extensions: ['.elm', '.scss', '.ts']
     },
 
     module: {
         rules: [
+            { test: /\.ts$/, loader: 'ts-loader' },
+            { test: /\.js$/, loader: 'source-map-loader', enforce: 'pre' },
             {
                 test: /\.elm$/,
                 exclude: [/elm-stuff/, /node_modules/],
