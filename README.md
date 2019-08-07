@@ -1,1 +1,1 @@
-Lambdalingo is a progressive web app which maps audio files to text. I am currently using it to learn Vietnamese using the [FSI](https://fsi.nsenger.com) and [DLI](https://dli.nsenger.com) language courses, but it could be used in numerous other applications.
+Lambdalingo is a progressive web app which maps audio files to text. Examples at https://fsi.nsenger.com and https://dli.nsenger.com.
