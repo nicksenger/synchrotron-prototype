@@ -10,7 +10,7 @@
       "module": "commonjs",
       "target": "es5",
       "suppressImplicitAnyIndexErrors": true,
-      "lib": ["webworker"]
+      "lib": ["dom", "webworker"]
   },
   "include": [
       "./src/**/*"

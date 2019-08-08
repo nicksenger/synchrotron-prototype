@@ -7,8 +7,21 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Keyed as Keyed
 import Html.Lazy exposing (lazy, lazy2)
-import Json.Decode as Json
+import Http
 import Task
+import Json.Decode exposing
+    ( Decoder
+    , field
+    , string
+    , int
+    , map2
+    , map3
+    , map4
+    , map6
+    , list
+    , float
+    , maybe
+    )
 
 
 main : Program (Maybe Model) Model Msg
@@ -25,22 +38,21 @@ main =
 
 
 type alias Model = 
-    { playbackRate: Float
+    { loading: Bool
+    , error: Maybe String
+    , playbackRate: Float
     , inverted: Bool
     , admin: Bool
     , activePage: Int
     , scrollEnabled: Bool
-    , allPages: List String
-    , allTracks: List Track
-    , bookmarks: List Bookmark
-    , pageHeights: List Float
-    , sizePointers: List Pointer
     , addingAnchor: Bool
     , addingTextAnchor: Bool
     , removingAnchor: Bool
     , movingAnchor: Bool
     , activeTrack: Int
-    , anchors: List PageAnchors
+    , bookmarks: List Bookmark
+    , pages: List Page
+    , tracks: List Track
     }
 
 
@@ -52,7 +64,7 @@ type alias Track =
 
 type alias Bookmark =
     { title: String
-    , index: Int
+    , page: Int
     }
 
 
@@ -62,14 +74,16 @@ type alias Pointer =
     }
 
 
-type alias PageAnchors =
-    { page: Int
+type alias Page =
+    { path: String
+    , aspectRatio: Float
+    , height: Float
     , anchors: List Anchor
     }
 
 type alias Anchor =
     { id: String
-    , track: String
+    , track: Int
     , time: Float
     , top: Float
     , left: Float
@@ -79,29 +93,28 @@ type alias Anchor =
 
 emptyModel : Model
 emptyModel =
-    { playbackRate = 1
+    { loading = True
+    , error = Nothing
+    , playbackRate = 1
     , inverted = False
     , admin = False
     , activePage = 0
     , scrollEnabled = True
-    , allPages = []
-    , allTracks = []
-    , bookmarks = []
-    , pageHeights = []
-    , sizePointers = []
     , addingAnchor = False
     , addingTextAnchor = False
     , removingAnchor = False
     , movingAnchor = False
     , activeTrack = 0
-    , anchors = []
+    , bookmarks = []
+    , pages = []
+    , tracks = []
     }
 
 
 init : Maybe Model -> ( Model, Cmd Msg )
 init maybeModel =
   ( Maybe.withDefault emptyModel maybeModel
-  , Cmd.none
+  , getData
   )
 
 
@@ -109,14 +122,31 @@ init maybeModel =
 
 
 type Msg
-    = NoOp
+    = GotData (Result Http.Error InputData)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NoOp ->
-            ( model, Cmd.none )
+        GotData result ->
+            case result of
+                Ok data ->
+                    ( { model
+                        | loading = False
+                        , bookmarks = data.bookmarks
+                        , pages = data.pages
+                        , tracks = data.tracks
+                    }
+                    , Cmd.none
+                    )
+            
+                Err _ ->
+                    ( { model
+                        | loading = False
+                        , error = Just "Failed."
+                    }
+                    , Cmd.none
+                    )
 
 
 -- View
@@ -124,4 +154,80 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [] []
+    case model.loading of
+        True ->
+            text "Loading..."
+        False ->
+            case model.error of
+                Just a ->
+                    text a
+                Nothing ->
+                    div []
+                        [ h3 [] [ text "Tracks" ]
+                        , ul [] (List.map viewTrack model.tracks)
+                        ]
+
+
+viewTrack : Track -> Html Msg
+viewTrack track =
+    li [] [ text track.title ]
+
+
+-- HTTP
+
+
+getData : Cmd Msg
+getData =
+  Http.get
+    { url = "/courses/vietnamese/fsi/data.json"
+    , expect = Http.expectJson GotData inputDataDecoder
+    }
+
+
+type alias InputData =
+    { bookmarks: List Bookmark
+    , pages: List Page
+    , tracks: List Track
+    }
+
+
+inputDataDecoder : Decoder InputData
+inputDataDecoder =
+    map3 InputData
+        (field "bookmarks" (list bookmarkDecoder))
+        (field "pages" (list pageDecoder))
+        (field "tracks" (list trackDecoder))
+
+
+bookmarkDecoder : Decoder Bookmark
+bookmarkDecoder =
+    map2 Bookmark
+        (field "title" string)
+        (field "page" int)
+
+
+pageDecoder : Decoder Page
+pageDecoder =
+    map4 Page
+        (field "path" string)
+        (field "aspectRatio" float)
+        (field "height" float)
+        (field "anchors" (list anchorDecoder))
+
+
+anchorDecoder : Decoder Anchor
+anchorDecoder =
+    map6 Anchor
+        (field "id" string)
+        (field "track" int)
+        (field "time" float)
+        (field "top" float)
+        (field "left" float)
+        (maybe (field "text" string))
+
+
+trackDecoder : Decoder Track
+trackDecoder =
+    map2 Track
+        (field "title" string)
+        (field "path" string)

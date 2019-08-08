@@ -3,7 +3,7 @@ const path = require('path');
 
 module.exports = {
     entry: {
-        bundle: ['./src/Main.elm', './src/styles/index.scss'],
+        bundle: ['./src/index.ts', './src/styles/index.scss'],
         sw: './src/sw.ts'
     },
     output: {

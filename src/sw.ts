@@ -5,14 +5,14 @@ const filesToCache = [
 ];
 const staticCacheName = 'lambdalingo-v1';
 
-const cacheAndRespond = async (event: FetchEvent) => {
+async function cacheAndReturn(event: FetchEvent) {
     const url = event.request.url;
     const response = await fetch(event.request);
     const cache = await caches.open(staticCacheName);
     if (!url.includes('test')) {
         cache.put(url, response.clone());
     }
-    event.respondWith(response);
+    return response;
 }
 
 const initialize = (service: ServiceWorkerGlobalScope): void => {
@@ -25,13 +25,13 @@ const initialize = (service: ServiceWorkerGlobalScope): void => {
     service.addEventListener('fetch', event => {
         const url = event.request.url;
         if (Boolean(filesToCache.filter(f => url.endsWith(f)).length)) {
-            cacheAndRespond(event);
+            event.respondWith(cacheAndReturn(event));
         } else {
             caches.match(event.request).then(cached => {
                 if (cached) {
                     event.respondWith(cached);
                 } else {
-                    cacheAndRespond(event);
+                    event.respondWith(cacheAndReturn(event));
                 }
             }).catch(function (error: Error) {
                 // do something when offline
@@ -40,4 +40,4 @@ const initialize = (service: ServiceWorkerGlobalScope): void => {
     });
 }
 
-initialize(self as ServiceWorkerGlobalScope);
+initialize(self as any);
