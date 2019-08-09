@@ -8,6 +8,7 @@ import Html.Events exposing (..)
 import Html.Keyed as Keyed
 import Html.Lazy exposing (lazy, lazy2)
 import Http
+import String
 import Task
 import Json.Decode exposing
     ( Decoder
@@ -162,15 +163,120 @@ view model =
                 Just a ->
                     text a
                 Nothing ->
-                    div []
-                        [ h3 [] [ text "Tracks" ]
-                        , ul [] (List.map viewTrack model.tracks)
-                        ]
+                    mainView model
+
+mainView : Model -> Html Msg
+mainView model =
+    div
+        [ class "fsi__inner" ]
+        [ pagesView model
+        , menuView model
+        ]
 
 
-viewTrack : Track -> Html Msg
-viewTrack track =
-    li [] [ text track.title ]
+pagesView : Model -> Html Msg
+pagesView model =
+    div
+        [ id "page-container"
+        , class "fsi__page-container"
+        ]
+        (List.indexedMap (pageView model) model.pages)
+
+
+pageView : Model -> Int -> Page -> Html Msg
+pageView model idx page =
+    div
+        [ id (String.fromInt idx)
+        , class (getPageClass model.inverted)
+        , style "padding-top" (String.concat [String.fromFloat (page.aspectRatio * 100), "%"])
+        , value (String.fromInt idx)
+        ]
+        [ img
+            [ class (getImageClass model.inverted)
+            , src "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs="
+            ]
+            []
+        ]
+
+
+getPageClass : Bool -> String
+getPageClass i =
+    if i then
+        "page__container page__container--inverted"
+    else
+        "page__container"
+
+
+getImageClass : Bool -> String
+getImageClass i =
+    if i then
+        "page__image page__image--inverted"
+    else
+        "page__image"
+
+
+menuView : Model -> Html Msg
+menuView model =
+    div
+        [ class "fsi__menu" ]
+        [ invertButtonView model.inverted
+        , audioView model
+        , bookmarksView model
+        ]
+
+invertButtonView : Bool -> Html Msg
+invertButtonView i =
+    if i then
+        button
+            [ class "fsi__button fsi__button--inverted" ]
+            [ text "Light Mode" ]
+    else
+        button
+            [ class "fsi__button" ]
+            [ text "Dark Mode" ]
+
+
+audioView : Model -> Html Msg
+audioView model =
+    audio
+        [ id "audio"
+        , class (getAudioViewClass model.inverted)
+        , src "courses/vietnamese/dli/audio/1.mp3"
+        , controls True
+        ]
+        []
+
+
+getAudioViewClass : Bool -> String
+getAudioViewClass i =
+    if i then 
+        "fsi__audio fsi__audio--inverted"
+    else
+        "fsi__audio"
+
+
+bookmarksView : Model -> Html Msg
+bookmarksView model =
+    select
+        [ class (getBookmarksViewclass model.inverted) ]
+        (List.map bookmarkView model.bookmarks)
+
+
+getBookmarksViewclass : Bool -> String
+getBookmarksViewclass i =
+    if i then
+        "fsi__dropdown fsi__dropdown--inverted"
+    else
+        "fsi__dropdown"
+
+
+bookmarkView : Bookmark -> Html Msg
+bookmarkView b =
+    option
+        [ value (String.fromInt b.page)
+        , title b.title
+        ]
+        [ text b.title ]
 
 
 -- HTTP
