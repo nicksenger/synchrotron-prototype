@@ -67,7 +67,8 @@ type alias Model =
 
 
 type alias Track =
-    { title: String
+    { number: Int
+    , title: String
     , path: String
     }
 
@@ -137,6 +138,7 @@ type Msg
     | ReceiveScrollDataFromJS Float
     | Invert
     | SelectBookmark String
+    | SelectAnchor Anchor
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -210,10 +212,30 @@ update msg model =
             , Ports.sendActiveHeight activeHeight
             )
 
+        SelectAnchor a ->
+            let
+                track = List.head <| List.filter (isTrack a.track) model.tracks
+                path =
+                    case track of
+                        Just t ->
+                            t.path
+                        
+                        Nothing ->
+                            ""
+            in
+            ( model
+            , Ports.sendPlayback (Ports.PlaybackCommand path a.time model.playbackRate)
+            )
+
 
 isPage: Int -> Page -> Bool
 isPage n p =
     p.number == n
+
+
+isTrack: Int -> Track -> Bool
+isTrack n t =
+    t.number == n
 
 
 closestToHeight: Float -> Page -> Page -> Order
@@ -311,6 +333,7 @@ anchorView inverted anchor =
             a
                 [ style "top" <| "calc(" ++ (String.fromFloat anchor.top) ++ "% - 10px)"
                 , style "left" <| (String.fromFloat anchor.left) ++ "%"
+                , onClick <| SelectAnchor anchor
                 ]
                 [ text s ]
 
@@ -318,6 +341,7 @@ anchorView inverted anchor =
             div
                 [ style "top" <| (String.fromFloat anchor.top) ++ "%"
                 , style "left" <| (String.fromFloat anchor.left) ++ "%"
+                , onClick <| SelectAnchor anchor
                 ]
                 [ Svg.svg
                     [ width 100
@@ -404,7 +428,7 @@ bookmarkView b =
 getData : Cmd Msg
 getData =
   Http.get
-    { url = "/courses/vietnamese/fsi/data.json"
+    { url = "/courses/vietnamese/dli/data.json"
     , expect = Http.expectJson GotData inputDataDecoder
     }
 
@@ -454,6 +478,7 @@ anchorDecoder =
 
 trackDecoder : Decoder Track
 trackDecoder =
-    map2 Track
+    map3 Track
+        (field "number" int)
         (field "title" string)
         (field "path" string)

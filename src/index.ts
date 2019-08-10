@@ -25,7 +25,14 @@ const reportRelativeHeight = debounce(
 );
 
 
+interface PlaybackCommand {
+  path: string;
+  time: number;
+  rate: number;
+}
+
 setTimeout(() => {
+  const audio = document.getElementById('audio') as HTMLAudioElement;
   const pageContainer = document.getElementById('page-container');
 
   if (pageContainer) {
@@ -34,4 +41,28 @@ setTimeout(() => {
       pageContainer.scrollTop = activeHeight * pageContainer.clientWidth;
     });
   }
+
+  if (audio) {
+    app.ports.sendPlayback.subscribe(({ path, time, rate }: PlaybackCommand) => {
+      audio.src = path;
+      audio.currentTime = time;
+      audio.playbackRate = rate;
+      audio.play();
+    })
+  }
 }, 200);
+
+window.addEventListener('keydown', (ev: KeyboardEvent) => {
+  if (ev.shiftKey) {
+    if (ev.keyCode === 80) {
+      const audio = document.getElementById('audio') as HTMLAudioElement;
+      if (audio) {
+        if (audio.paused) {
+          audio.play();
+        } else {
+          audio.pause();
+        }
+      }
+    }
+  }
+});
