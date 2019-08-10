@@ -3,6 +3,8 @@ port module Main exposing (..)
 import Browser
 import Browser.Dom as Dom
 import Html exposing (..)
+import Svg
+import Svg.Attributes
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Keyed as Keyed
@@ -264,12 +266,12 @@ pageView model idx page =
         , style "padding-top" (String.concat [String.fromFloat (page.aspectRatio * 100), "%"])
         , value (String.fromInt idx)
         ]
-        [ img
+        ([ img
             [ class (getImageClass model.inverted)
             , src (getPageUri page model.activePage)
             ]
             []
-        ]
+        ] ++ (List.map (anchorView model.inverted) page.anchors))
 
 
 getPageClass : Bool -> String
@@ -299,6 +301,33 @@ getImageClass i =
         "page__image page__image--inverted"
     else
         "page__image"
+
+
+
+anchorView : Bool -> Anchor -> Html Msg
+anchorView inverted anchor =
+    case anchor.text of
+        Just s ->
+            a
+                [ style "top" <| "calc(" ++ (String.fromFloat anchor.top) ++ "% - 10px)"
+                , style "left" <| (String.fromFloat anchor.left) ++ "%"
+                ]
+                [ text s ]
+
+        Nothing -> 
+            div
+                [ style "top" <| (String.fromFloat anchor.top) ++ "%"
+                , style "left" <| (String.fromFloat anchor.left) ++ "%"
+                ]
+                [ Svg.svg
+                    [ width 100
+                    , height 100
+                    ]
+                    [ Svg.path
+                        [ Svg.Attributes.d "M10,10 L90,10 L90,90" ]
+                        []
+                    ]
+                ]
 
 
 menuView : Model -> Html Msg
@@ -375,7 +404,7 @@ bookmarkView b =
 getData : Cmd Msg
 getData =
   Http.get
-    { url = "/courses/vietnamese/dli/data.json"
+    { url = "/courses/vietnamese/fsi/data.json"
     , expect = Http.expectJson GotData inputDataDecoder
     }
 

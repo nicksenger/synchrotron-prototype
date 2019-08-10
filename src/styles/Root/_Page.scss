@@ -1,6 +1,127 @@
+$weight: 10px;
+$circle: 30px;
+$arrow: 15px;
+
 .page__container {
   position: relative;
   width: 100%;
+
+  > a {
+    @include code-face();
+    font-weight: 700;
+    font-size: 1em;
+    position: absolute;
+    z-index: 5;
+    color: $blue;
+    cursor: pointer;
+    transform: translate(0%, -50%);
+    &:hover {
+        color: $darker-blue;
+    }
+    &:before {
+        content: "\A";
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: $blue;
+        display: inline-block;
+        vertical-align: middle;
+        @include margin-right-fraction(3);
+    }
+    @media (max-width: 1200px) {
+        font-size: 0.8em;
+    }
+    @media (max-width: 800px) {
+        font-size: 0.6em;
+    }
+    @media (max-width: 400px) {
+        font-size: 0.4em;
+    }
+  }
+
+  > div {
+    position: absolute;
+    z-index: 5;
+    width: $circle;
+    height: $circle;
+    border-radius: 50%;
+    background-color: $light-blue;
+    border: 2px solid $blue;
+    opacity: 0.75;
+    cursor: pointer;
+    transition: all 150ms ease-out;
+    transform: translate(-50%, -50%);
+    &:hover {
+        background-color: $blue;
+        .anchor__arrow{
+            path {
+                stroke-width: $weight + 15;
+            }
+        }
+    }
+
+    @media (max-width: 1200px) {
+        width: $circle * (2/3);
+        height: $circle * (2/3);
+    }
+    @media (max-width: 800px) {
+        width: $circle * (1/2);
+        height: $circle * (1/2);
+    }
+    @media (max-width: 400px) {
+        width: $circle * (1/3);
+        height: $circle * (1/3);
+    }
+
+    > svg {
+      $fill: none;
+      $stroke: $white;
+      $linecap: round;
+      $dasharray: none;
+      width: $arrow;
+      height: $arrow;
+      transform-origin: 50% 50%;
+      transform: translate(35%, 50%) rotate(45deg);
+      display: inline-block;
+      path {
+          fill: none;
+          stroke: $stroke;
+          stroke-width: $weight;
+          stroke-linecap: $linecap;
+          stroke-dasharray: $dasharray;
+          transform: scale(($arrow / 100px));
+          transition: all 150ms ease-out;
+      }
+  
+      @media (max-width: 1200px) {
+          width: $arrow * (2/3);
+          height: $arrow * (2/3);
+          transform: translate(35%, 10%) rotate(45deg);
+  
+          path {
+              transform: scale(($arrow / 100px) * (2/3));
+          }
+      }
+      @media (max-width: 800px) {
+          width: $arrow * (1/2);
+          height: $arrow * (1/2);
+          transform: translate(35%, -45%) rotate(45deg);
+  
+          path {
+              transform: scale(($arrow / 100px) * (1/2));
+          }
+      }
+      @media (max-width: 400px) {
+          width: $arrow * (1/3);
+          height: $arrow * (1/3);
+          transform: translate(35%, -130%) rotate(45deg);
+  
+          path {
+              transform: scale(($arrow / 100px) * (1/3));
+          }
+      }
+    }
+  }
 }
 
 .page__container--inverted {
