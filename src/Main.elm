@@ -8,6 +8,7 @@ import Html.Events exposing (..)
 import Html.Keyed as Keyed
 import Html.Lazy exposing (lazy, lazy2)
 import Http
+import Ports exposing (receiveScrollData)
 import String
 import Task
 import Json.Decode exposing
@@ -17,7 +18,7 @@ import Json.Decode exposing
     , int
     , map2
     , map3
-    , map4
+    , map5
     , map6
     , list
     , float
@@ -29,10 +30,15 @@ main : Program (Maybe Model) Model Msg
 main =
     Browser.document
         { init = init
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = subscriptions
         , update = update
         , view = \model -> { title = "Synchrotron", body = [view model] }
         }
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    receiveScrollData ReceiveScrollDataFromJS
 
 
 -- Model
@@ -44,7 +50,7 @@ type alias Model =
     , playbackRate: Float
     , inverted: Bool
     , admin: Bool
-    , activePage: Int
+    , activePage: Maybe Page
     , scrollEnabled: Bool
     , addingAnchor: Bool
     , addingTextAnchor: Bool
@@ -76,7 +82,8 @@ type alias Pointer =
 
 
 type alias Page =
-    { path: String
+    { number: Int
+    , path: String
     , aspectRatio: Float
     , height: Float
     , anchors: List Anchor
@@ -99,7 +106,7 @@ emptyModel =
     , playbackRate = 1
     , inverted = False
     , admin = False
-    , activePage = 0
+    , activePage = Nothing
     , scrollEnabled = True
     , addingAnchor = False
     , addingTextAnchor = False
@@ -124,6 +131,8 @@ init maybeModel =
 
 type Msg
     = GotData (Result Http.Error InputData)
+    | ReceiveScrollDataFromJS Float
+    | Invert
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -134,6 +143,7 @@ update msg model =
                 Ok data ->
                     ( { model
                         | loading = False
+                        , activePage = List.head data.pages
                         , bookmarks = data.bookmarks
                         , pages = data.pages
                         , tracks = data.tracks
@@ -149,6 +159,28 @@ update msg model =
                     , Cmd.none
                     )
 
+        ReceiveScrollDataFromJS rh ->
+            ( { model
+                | activePage = List.head (List.sortWith (closestToHeight rh) model.pages)
+            }
+            , Cmd.none
+            )
+
+        Invert ->
+            ( { model
+                | inverted = not model.inverted
+            }
+            , Cmd.none
+            )
+
+
+closestToHeight: Float -> Page -> Page -> Order
+closestToHeight rh a b =
+    case compare (abs (a.height - rh)) (abs(b.height - rh)) of
+        LT -> LT
+        EQ -> EQ
+        GT -> GT
+
 
 -- View
 
@@ -158,6 +190,7 @@ view model =
     case model.loading of
         True ->
             text "Loading..."
+
         False ->
             case model.error of
                 Just a ->
@@ -193,7 +226,7 @@ pageView model idx page =
         ]
         [ img
             [ class (getImageClass model.inverted)
-            , src "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs="
+            , src (getPageUri page model.activePage)
             ]
             []
         ]
@@ -205,6 +238,19 @@ getPageClass i =
         "page__container page__container--inverted"
     else
         "page__container"
+
+
+getPageUri : Page -> Maybe Page -> String
+getPageUri page activePage =
+    case activePage of
+        Just p ->
+            if (abs (p.number - page.number)) < 4 then
+                page.path
+            else
+                "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs="
+
+        Nothing ->
+            "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs="
 
 
 getImageClass : Bool -> String
@@ -228,11 +274,13 @@ invertButtonView : Bool -> Html Msg
 invertButtonView i =
     if i then
         button
-            [ class "fsi__button fsi__button--inverted" ]
+            [ class "fsi__button fsi__button--inverted"
+            , onClick Invert ]
             [ text "Light Mode" ]
     else
         button
-            [ class "fsi__button" ]
+            [ class "fsi__button"
+            , onClick Invert ]
             [ text "Dark Mode" ]
 
 
@@ -314,7 +362,8 @@ bookmarkDecoder =
 
 pageDecoder : Decoder Page
 pageDecoder =
-    map4 Page
+    map5 Page
+        (field "number" int)
         (field "path" string)
         (field "aspectRatio" float)
         (field "height" float)
