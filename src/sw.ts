@@ -3,7 +3,7 @@ const filesToCache = [
     'bundle.css',
     'bundle.js'
 ];
-const staticCacheName = 'lambdalingo-v1';
+const staticCacheName = 'synchrotron-v1';
 
 async function cacheAndReturn(event: FetchEvent) {
     const url = event.request.url;

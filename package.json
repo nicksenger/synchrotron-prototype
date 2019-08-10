@@ -1,7 +1,7 @@
 {
-  "name": "lambdalingo",
+  "name": "synchrotron",
   "version": "1.0.0",
-  "description": "Lambdalingo is a progressive web app which maps audio files to text.",
+  "description": "synchrotron is a progressive web app which maps audio files to text.",
   "main": "index.js",
   "scripts": {
     "build": "webpack -p",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nicksenger/lambdalingo.git"
+    "url": "git+https://github.com/nicksenger/synchrotron.git"
   },
   "author": "Nick Senger",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/nicksenger/lambdalingo/issues"
+    "url": "https://github.com/nicksenger/synchrotron/issues"
   },
-  "homepage": "https://github.com/nicksenger/lambdalingo#readme",
+  "homepage": "https://github.com/nicksenger/synchrotron#readme",
   "devDependencies": {
     "autoprefixer": "^9.6.1",
     "css-loader": "^3.1.0",

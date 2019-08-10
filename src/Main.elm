@@ -31,7 +31,7 @@ main =
         { init = init
         , subscriptions = \_ -> Sub.none
         , update = update
-        , view = \model -> { title = "LambdaLingo", body = [view model] }
+        , view = \model -> { title = "Synchrotron", body = [view model] }
         }
 
 
