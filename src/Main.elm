@@ -8,7 +8,7 @@ import Html.Events exposing (..)
 import Html.Keyed as Keyed
 import Html.Lazy exposing (lazy, lazy2)
 import Http
-import Ports exposing (receiveScrollData)
+import Ports
 import String
 import Task
 import Json.Decode exposing
@@ -16,6 +16,7 @@ import Json.Decode exposing
     , field
     , string
     , int
+    , map
     , map2
     , map3
     , map5
@@ -38,7 +39,7 @@ main =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    receiveScrollData ReceiveScrollDataFromJS
+    Ports.receiveScrollData ReceiveScrollDataFromJS
 
 
 -- Model
@@ -133,6 +134,7 @@ type Msg
     = GotData (Result Http.Error InputData)
     | ReceiveScrollDataFromJS Float
     | Invert
+    | SelectBookmark String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -172,6 +174,44 @@ update msg model =
             }
             , Cmd.none
             )
+
+        SelectBookmark s ->
+            let
+                n = String.toInt s
+                newActivePage =
+                    case n of
+                        Just i ->
+                            List.head (List.filter (isPage i) model.pages)
+                        
+                        Nothing ->
+                            Nothing
+
+                activeHeight =
+                    case newActivePage of
+                        Just p ->
+                            p.height
+                        
+                        Nothing ->
+                            0
+
+                aspectRatio =
+                    case newActivePage of
+                        Just p ->
+                            p.aspectRatio
+                        
+                        Nothing ->
+                            0
+            in
+            ( { model
+                | activePage = newActivePage
+            }
+            , Ports.sendActiveHeight activeHeight
+            )
+
+
+isPage: Int -> Page -> Bool
+isPage n p =
+    p.number == n
 
 
 closestToHeight: Float -> Page -> Page -> Order
@@ -244,7 +284,7 @@ getPageUri : Page -> Maybe Page -> String
 getPageUri page activePage =
     case activePage of
         Just p ->
-            if (abs (p.number - page.number)) < 4 then
+            if (abs (p.number - page.number)) < 3 then
                 page.path
             else
                 "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs="
@@ -306,7 +346,9 @@ getAudioViewClass i =
 bookmarksView : Model -> Html Msg
 bookmarksView model =
     select
-        [ class (getBookmarksViewclass model.inverted) ]
+        [ class (getBookmarksViewclass model.inverted)
+        , onInput SelectBookmark
+        ]
         (List.map bookmarkView model.bookmarks)
 
 
@@ -333,7 +375,7 @@ bookmarkView b =
 getData : Cmd Msg
 getData =
   Http.get
-    { url = "/courses/vietnamese/fsi/data.json"
+    { url = "/courses/vietnamese/dli/data.json"
     , expect = Http.expectJson GotData inputDataDecoder
     }
 

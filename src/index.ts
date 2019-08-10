@@ -22,11 +22,16 @@ const reportRelativeHeight = debounce(
     app.ports.receiveScrollData.send(relativeHeight);
   },
   200
-)
+);
+
 
 setTimeout(() => {
   const pageContainer = document.getElementById('page-container');
+
   if (pageContainer) {
     pageContainer.addEventListener('scroll', reportRelativeHeight);
+    app.ports.sendActiveHeight.subscribe((activeHeight: number) => {
+      pageContainer.scrollTop = activeHeight * pageContainer.clientWidth;
+    });
   }
 }, 200);
