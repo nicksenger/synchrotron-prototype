@@ -199,7 +199,7 @@ update msg model =
                 newActivePage =
                     case n of
                         Just i ->
-                            List.head (List.filter (isPage i) model.pages)
+                            List.head (List.filter (matchingPage i) model.pages)
 
                         Nothing ->
                             Nothing
@@ -208,14 +208,6 @@ update msg model =
                     case newActivePage of
                         Just p ->
                             p.height
-
-                        Nothing ->
-                            0
-
-                aspectRatio =
-                    case newActivePage of
-                        Just p ->
-                            p.aspectRatio
 
                         Nothing ->
                             0
@@ -229,7 +221,7 @@ update msg model =
         SelectAnchor a ->
             let
                 track =
-                    List.head <| List.filter (isTrack a.track) model.tracks
+                    List.head <| List.filter (matchingTrack a.track) model.tracks
 
                 path =
                     case track of
@@ -244,13 +236,13 @@ update msg model =
             )
 
 
-isPage : Int -> Page -> Bool
-isPage n p =
+matchingPage : Int -> Page -> Bool
+matchingPage n p =
     p.number == n
 
 
-isTrack : Int -> Track -> Bool
-isTrack n t =
+matchingTrack : Int -> Track -> Bool
+matchingTrack n t =
     t.number == n
 
 
