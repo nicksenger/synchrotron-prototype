@@ -3,7 +3,7 @@ const filesToCache = [
     'bundle.css',
     'bundle.js'
 ];
-const staticCacheName = 'synchrotron-v1';
+const staticCacheName = `${process.env.TITLE}-v1`;
 
 async function cacheAndReturn(event: FetchEvent) {
     const url = event.request.url;
