@@ -255,182 +255,6 @@ closestToHeight rh a b =
         GT -> GT
 
 
--- View
-
-
-view : Model -> Html Msg
-view model =
-    case model.loading of
-        True ->
-            text "Loading..."
-
-        False ->
-            case model.error of
-                Just a ->
-                    text a
-                Nothing ->
-                    mainView model
-
-mainView : Model -> Html Msg
-mainView model =
-    div
-        [ class "fsi__inner" ]
-        [ pagesView model
-        , menuView model
-        ]
-
-
-pagesView : Model -> Html Msg
-pagesView model =
-    div
-        [ id "page-container"
-        , class "fsi__page-container"
-        ]
-        (List.indexedMap (pageView model) model.pages)
-
-
-pageView : Model -> Int -> Page -> Html Msg
-pageView model idx page =
-    div
-        [ id (String.fromInt idx)
-        , class (getPageClass model.inverted)
-        , style "padding-top" (String.concat [String.fromFloat (page.aspectRatio * 100), "%"])
-        , value (String.fromInt idx)
-        ]
-        ([ img
-            [ class (getImageClass model.inverted)
-            , src (getPageUri page model.activePage)
-            ]
-            []
-        ] ++ (List.map (anchorView model.inverted) page.anchors))
-
-
-getPageClass : Bool -> String
-getPageClass i =
-    if i then
-        "page__container page__container--inverted"
-    else
-        "page__container"
-
-
-getPageUri : Page -> Maybe Page -> String
-getPageUri page activePage =
-    case activePage of
-        Just p ->
-            if (abs (p.number - page.number)) < 3 then
-                page.path
-            else
-                "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs="
-
-        Nothing ->
-            "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs="
-
-
-getImageClass : Bool -> String
-getImageClass i =
-    if i then
-        "page__image page__image--inverted"
-    else
-        "page__image"
-
-
-
-anchorView : Bool -> Anchor -> Html Msg
-anchorView inverted anchor =
-    case anchor.text of
-        Just s ->
-            a
-                [ style "top" <| "calc(" ++ (String.fromFloat anchor.top) ++ "% - 10px)"
-                , style "left" <| (String.fromFloat anchor.left) ++ "%"
-                , onClick <| SelectAnchor anchor
-                ]
-                [ text s ]
-
-        Nothing -> 
-            div
-                [ style "top" <| (String.fromFloat anchor.top) ++ "%"
-                , style "left" <| (String.fromFloat anchor.left) ++ "%"
-                , onClick <| SelectAnchor anchor
-                ]
-                [ Svg.svg
-                    [ width 100
-                    , height 100
-                    ]
-                    [ Svg.path
-                        [ Svg.Attributes.d "M10,10 L90,10 L90,90" ]
-                        []
-                    ]
-                ]
-
-
-menuView : Model -> Html Msg
-menuView model =
-    div
-        [ class "fsi__menu" ]
-        [ invertButtonView model.inverted
-        , audioView model
-        , bookmarksView model
-        ]
-
-invertButtonView : Bool -> Html Msg
-invertButtonView i =
-    if i then
-        button
-            [ class "fsi__button fsi__button--inverted"
-            , onClick Invert ]
-            [ text "Light Mode" ]
-    else
-        button
-            [ class "fsi__button"
-            , onClick Invert ]
-            [ text "Dark Mode" ]
-
-
-audioView : Model -> Html Msg
-audioView model =
-    audio
-        [ id "audio"
-        , class (getAudioViewClass model.inverted)
-        , src "courses/vietnamese/dli/audio/1.mp3"
-        , controls True
-        ]
-        []
-
-
-getAudioViewClass : Bool -> String
-getAudioViewClass i =
-    if i then 
-        "fsi__audio fsi__audio--inverted"
-    else
-        "fsi__audio"
-
-
-bookmarksView : Model -> Html Msg
-bookmarksView model =
-    select
-        [ class (getBookmarksViewclass model.inverted)
-        , onInput SelectBookmark
-        ]
-        (List.map bookmarkView model.bookmarks)
-
-
-getBookmarksViewclass : Bool -> String
-getBookmarksViewclass i =
-    if i then
-        "fsi__dropdown fsi__dropdown--inverted"
-    else
-        "fsi__dropdown"
-
-
-bookmarkView : Bookmark -> Html Msg
-bookmarkView b =
-    option
-        [ value (String.fromInt b.page)
-        , title b.title
-        ]
-        [ text b.title ]
-
-
 -- HTTP
 
 
@@ -491,3 +315,155 @@ trackDecoder =
         (field "number" int)
         (field "title" string)
         (field "path" string)
+
+
+-- View
+
+
+view : Model -> Html Msg
+view model =
+    case model.loading of
+        True ->
+            text "Loading..."
+
+        False ->
+            case model.error of
+                Just a ->
+                    text a
+                Nothing ->
+                    mainView model
+
+mainView : Model -> Html Msg
+mainView model =
+    div
+        [ class "fsi__inner" ]
+        [ pagesView model
+        , menuView model
+        ]
+
+
+pagesView : Model -> Html Msg
+pagesView model =
+    div
+        [ id "page-container"
+        , class "fsi__page-container"
+        ]
+        (List.indexedMap (pageView model) model.pages)
+
+
+pageView : Model -> Int -> Page -> Html Msg
+pageView model idx page =
+    div
+        [ id (String.fromInt idx)
+        , class ((getInvertedClass "page__container") model.inverted)
+        , style "padding-top" (String.concat [String.fromFloat (page.aspectRatio * 100), "%"])
+        , value (String.fromInt idx)
+        ]
+        ([ img
+            [ class ((getInvertedClass "page__image") model.inverted)
+            , src (getPageUri page model.activePage)
+            ]
+            []
+        ] ++ (List.map (anchorView model.inverted) page.anchors))
+
+
+getPageUri : Page -> Maybe Page -> String
+getPageUri page activePage =
+    case activePage of
+        Just p ->
+            if (abs (p.number - page.number)) < 3 then
+                page.path
+            else
+                "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs="
+
+        Nothing ->
+            "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs="
+
+
+
+anchorView : Bool -> Anchor -> Html Msg
+anchorView inverted anchor =
+    case anchor.text of
+        Just s ->
+            a
+                [ style "top" <| "calc(" ++ (String.fromFloat anchor.top) ++ "% - 10px)"
+                , style "left" <| (String.fromFloat anchor.left) ++ "%"
+                , onClick <| SelectAnchor anchor
+                ]
+                [ text s ]
+
+        Nothing -> 
+            div
+                [ style "top" <| (String.fromFloat anchor.top) ++ "%"
+                , style "left" <| (String.fromFloat anchor.left) ++ "%"
+                , onClick <| SelectAnchor anchor
+                ]
+                [ Svg.svg
+                    [ width 100
+                    , height 100
+                    ]
+                    [ Svg.path
+                        [ Svg.Attributes.d "M10,10 L90,10 L90,90" ]
+                        []
+                    ]
+                ]
+
+
+menuView : Model -> Html Msg
+menuView model =
+    div
+        [ class "fsi__menu" ]
+        [ invertButtonView model.inverted
+        , audioView model
+        , bookmarksView model
+        ]
+
+invertButtonView : Bool -> Html Msg
+invertButtonView i =
+    if i then
+        button
+            [ class "fsi__button fsi__button--inverted"
+            , onClick Invert ]
+            [ text "Light Mode" ]
+    else
+        button
+            [ class "fsi__button"
+            , onClick Invert ]
+            [ text "Dark Mode" ]
+
+
+audioView : Model -> Html Msg
+audioView model =
+    audio
+        [ id "audio"
+        , class ((getInvertedClass "fsi__audio") model.inverted)
+        , src "courses/vietnamese/dli/audio/1.mp3"
+        , controls True
+        ]
+        []
+
+
+bookmarksView : Model -> Html Msg
+bookmarksView model =
+    select
+        [ class ((getInvertedClass "fsi__dropdown") model.inverted)
+        , onInput SelectBookmark
+        ]
+        (List.map bookmarkView model.bookmarks)
+
+
+bookmarkView : Bookmark -> Html Msg
+bookmarkView b =
+    option
+        [ value (String.fromInt b.page)
+        , title b.title
+        ]
+        [ text b.title ]
+
+
+getInvertedClass : String -> Bool -> String
+getInvertedClass class i =
+    if i then
+        class ++ " " ++ class ++ "--inverted"
+    else
+        class
