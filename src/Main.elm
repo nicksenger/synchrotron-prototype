@@ -344,7 +344,7 @@ view model =
 mainView : Model -> Html Msg
 mainView model =
     div
-        [ class "fsi__inner" ]
+        [ class "synchrotron__inner" ]
         [ pagesView model
         , menuView model
         ]
@@ -354,7 +354,7 @@ pagesView : Model -> Html Msg
 pagesView model =
     div
         [ id "page-container"
-        , class "fsi__page-container"
+        , class "synchrotron__page-container"
         ]
         (List.indexedMap (pageView model) model.pages)
 
@@ -422,7 +422,7 @@ anchorView inverted anchor =
 menuView : Model -> Html Msg
 menuView model =
     div
-        [ class "fsi__menu" ]
+        [ class "synchrotron__menu" ]
         [ invertButtonView model.inverted
         , audioView model
         , bookmarksView model
@@ -433,14 +433,14 @@ invertButtonView : Bool -> Html Msg
 invertButtonView i =
     if i then
         button
-            [ class "fsi__button fsi__button--inverted"
+            [ class "synchrotron__button synchrotron__button--inverted"
             , onClick Invert
             ]
             [ text "Light Mode" ]
 
     else
         button
-            [ class "fsi__button"
+            [ class "synchrotron__button"
             , onClick Invert
             ]
             [ text "Dark Mode" ]
@@ -450,7 +450,7 @@ audioView : Model -> Html Msg
 audioView model =
     audio
         [ id "audio"
-        , class <| getInvertedClass "fsi__audio" model.inverted
+        , class <| getInvertedClass "synchrotron__audio" model.inverted
         , src "courses/vietnamese/dli/audio/1.mp3"
         , controls True
         ]
@@ -460,7 +460,7 @@ audioView model =
 bookmarksView : Model -> Html Msg
 bookmarksView model =
     select
-        [ class <| getInvertedClass "fsi__dropdown" model.inverted
+        [ class <| getInvertedClass "synchrotron__dropdown" model.inverted
         , onInput SelectBookmark
         ]
         (List.map bookmarkView model.bookmarks)

@@ -4,7 +4,7 @@ const argv = require('yargs').argv
 
 module.exports = {
     entry: {
-        bundle: ['./src/index.ts', './src/styles/index.scss'],
+        bundle: ['./src/index.ts', './src/styles.scss'],
         sw: './src/sw.ts'
     },
     output: {

@@ -5,7 +5,7 @@ const app = Elm.Main.init({
   flags: [process.env.DATA_PATH, process.env.TITLE]
 });
 
-document.body.classList.add('fsi__container');
+document.body.classList.add('synchrotron__container');
 
 const debounce = <F extends (...params: any[]) => void>(fn: F, delay: number) => {
   let timeoutID: number | undefined = undefined;

@@ -1,6 +1,85 @@
+@import "~fluorophore/_index";
+@include code-type-import();
+
 $weight: 10px;
 $circle: 30px;
 $arrow: 15px;
+
+.synchrotron__container {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+  position: fixed;
+  width: 100%;
+}
+
+.synchrotron__inner {
+  width: 100%;
+  height: 100%;
+}
+
+.synchrotron__page-container {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: scroll;
+}
+
+.synchrotron__menu {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  border: 1px solid black;
+  background-color: whitesmoke;
+  box-sizing: border-box;
+  display: flex;
+  z-index: 5000000;
+}
+
+.synchrotron__admin-menu {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 1px solid black;
+  background-color: whitesmoke;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  z-index: 5000000;
+}
+
+.rate-select {
+  flex: 1;
+}
+
+.synchrotron__button--inverted {
+  background-color: black;
+  color: $fluorophore_barium_a2;
+  border: none;
+}
+
+.synchrotron__dropdown--inverted {
+  background-color: black;
+  color: $fluorophore_barium_a2;
+  border: none;
+}
+
+.synchrotron__audio {
+  flex: 1;
+}
+
+.synchrotron__audio--inverted {
+  filter: invert(1) sepia() saturate(500%) hue-rotate(75deg) brightness(75%);
+  background-color: white;
+}
+
+.menu__button {
+  border: 1px solid black;
+}
 
 .page__container {
   position: relative;
