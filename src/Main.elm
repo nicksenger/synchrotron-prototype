@@ -1,14 +1,11 @@
 port module Main exposing (..)
 
 import Browser
-import Browser.Dom as Dom
 import Html exposing (..)
 import Svg
 import Svg.Attributes
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Html.Keyed as Keyed
-import Html.Lazy exposing (lazy, lazy2)
 import Http
 import Ports
 import String
@@ -29,13 +26,13 @@ import Json.Decode exposing
     )
 
 
-main : Program (Maybe Model) Model Msg
+main : Program (String, String) Model Msg
 main =
     Browser.document
         { init = init
         , subscriptions = subscriptions
         , update = update
-        , view = \model -> { title = "Synchrotron", body = [view model] }
+        , view = \model -> { title = model.title, body = [view model] }
         }
 
 
@@ -48,7 +45,9 @@ subscriptions _ =
 
 
 type alias Model = 
-    { loading: Bool
+    { title: String
+    , dataPath: String
+    , loading: Bool
     , error: Maybe String
     , playbackRate: Float
     , inverted: Bool
@@ -105,7 +104,9 @@ type alias Anchor =
 
 emptyModel : Model
 emptyModel =
-    { loading = True
+    { title = "Synchrotron"
+    , dataPath = ""
+    , loading = True
     , error = Nothing
     , playbackRate = 1
     , inverted = False
@@ -123,11 +124,19 @@ emptyModel =
     }
 
 
-init : Maybe Model -> ( Model, Cmd Msg )
-init maybeModel =
-  ( Maybe.withDefault emptyModel maybeModel
-  , getData
-  )
+init : (String, String) -> ( Model, Cmd Msg )
+init (path, title) =
+    let
+        model =
+            { emptyModel
+            | title = title
+            , dataPath = path
+            }    
+    in
+    
+    ( model
+    , getData model
+    )
 
 
 -- Update
@@ -425,10 +434,10 @@ bookmarkView b =
 -- HTTP
 
 
-getData : Cmd Msg
-getData =
+getData : Model -> Cmd Msg
+getData model =
   Http.get
-    { url = "/courses/vietnamese/dli/data.json"
+    { url = model.dataPath
     , expect = Http.expectJson GotData inputDataDecoder
     }
 

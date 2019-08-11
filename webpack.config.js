@@ -1,5 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
+const argv = require('yargs').argv
 
 module.exports = {
     entry: {
@@ -47,10 +48,12 @@ module.exports = {
         ]
     },
 
-    devServer: {
-        contentBase: __dirname + '/dist',
-        hot: true,
-        inline: true,
-        port: 5555
-    }
+    plugins: [
+        new webpack.DefinePlugin({
+            'process.env': JSON.stringify({
+                DATA_PATH: argv.datapath,
+                TITLE: argv.title
+            })
+        })
+    ]
 };

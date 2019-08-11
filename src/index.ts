@@ -2,7 +2,7 @@ const { Elm } = require('./Main');
 
 const app = Elm.Main.init({
   node: document.getElementById('elm'),
-  flags: null
+  flags: [process.env.DATA_PATH, process.env.TITLE]
 });
 
 document.body.classList.add('fsi__container');
