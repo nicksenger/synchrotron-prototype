@@ -1,6 +1,7 @@
 module Tests exposing (..)
 
 import Expect
+import Fuzz
 import Http
 import Main
     exposing
@@ -20,37 +21,43 @@ import Main
         , update
         )
 import Ports
+import String
 import Test exposing (..)
 import Tuple exposing (first, second)
+
+
+initializationFuzzer : Fuzz.Fuzzer ( String, String )
+initializationFuzzer =
+    Fuzz.tuple ( Fuzz.string, Fuzz.string )
 
 
 suite =
     describe "Main"
         [ describe "init"
-            [ test "should pass the title and path to the model" <|
-                \_ ->
-                    ( "foo", "bar" )
+            [ fuzz initializationFuzzer "should pass the title and path to the model" <|
+                \( a, b ) ->
+                    ( a, b )
                         |> init
                         |> first
                         |> Expect.equal
                             { emptyModel
-                                | title = "bar"
-                                , dataPath = "foo"
+                                | title = b
+                                , dataPath = a
                             }
             ]
         , describe "getInvertedClass"
-            [ test "should be the input string if not inverted" <|
-                \_ ->
+            [ fuzz Fuzz.string "should be the input string if not inverted" <|
+                \s ->
                     False
-                        |> getInvertedClass "foobar"
+                        |> getInvertedClass s
                         |> Expect.equal
-                            "foobar"
-            , test "should be the proper inverted BEM class if inverted" <|
-                \_ ->
+                            s
+            , fuzz Fuzz.string "should be the proper inverted BEM class if inverted" <|
+                \s ->
                     True
-                        |> getInvertedClass "foobar"
+                        |> getInvertedClass s
                         |> Expect.equal
-                            ("foobar" ++ " " ++ "foobar" ++ "--inverted")
+                            (s ++ " " ++ s ++ "--inverted")
             ]
         , describe "closestToHeight"
             [ test "should be GT if the first page is closer" <|
@@ -67,30 +74,30 @@ suite =
                             LT
             ]
         , describe "matchingPage"
-            [ test "should be True if the page number matches" <|
-                \_ ->
-                    Page 8 "" 1.0 1.0 []
-                        |> matchingPage 8
+            [ fuzz Fuzz.int "should be True if the page number matches" <|
+                \n ->
+                    Page n "" 1.0 1.0 []
+                        |> matchingPage n
                         |> Expect.equal
                             True
-            , test "should be False if the page number doesn't match" <|
-                \_ ->
-                    Page 12 "" 1.0 1.0 []
-                        |> matchingPage 8
+            , fuzz Fuzz.int "should be False if the page number doesn't match" <|
+                \n ->
+                    Page n "" 1.0 1.0 []
+                        |> matchingPage (n - 4)
                         |> Expect.equal
                             False
             ]
         , describe "matchingTrack"
-            [ test "should be True if the track number matches" <|
-                \_ ->
-                    Track 8 "" ""
-                        |> matchingTrack 8
+            [ fuzz Fuzz.int "should be True if the track number matches" <|
+                \n ->
+                    Track n "" ""
+                        |> matchingTrack n
                         |> Expect.equal
                             True
-            , test "should be False if the track number doesn't match" <|
-                \_ ->
-                    Track 12 "" ""
-                        |> matchingTrack 8
+            , fuzz Fuzz.int "should be False if the track number doesn't match" <|
+                \n ->
+                    Track n "" ""
+                        |> matchingTrack (n - 4)
                         |> Expect.equal
                             False
             ]
@@ -217,21 +224,12 @@ suite =
                             |> second
                             |> Expect.equal
                                 Cmd.none
-                , test "should flip 'inverted' to True if False" <|
-                    \_ ->
-                        emptyModel
-                            |> update Invert
-                            |> first
-                            |> Expect.equal
-                                { emptyModel
-                                    | inverted = True
-                                }
-                , test "should flip 'inverted' to False if True" <|
-                    \_ ->
+                , fuzz Fuzz.bool "should flip 'inverted' to False if True" <|
+                    \b ->
                         let
                             model =
                                 { emptyModel
-                                    | inverted = True
+                                    | inverted = b
                                 }
                         in
                         model
@@ -239,7 +237,7 @@ suite =
                             |> first
                             |> Expect.equal
                                 { model
-                                    | inverted = False
+                                    | inverted = not b
                                 }
                 ]
             , describe "SelectBookmark"
@@ -250,20 +248,20 @@ suite =
                             |> second
                             |> Expect.equal
                                 (Ports.sendActiveHeight 0)
-                , test "should set the activePage if there's a match" <|
-                    \_ ->
+                , fuzz Fuzz.int "should set the activePage if there's a match" <|
+                    \n ->
                         let
                             model =
                                 { emptyModel
-                                    | pages = [ Page 8 "" 1.0 1.0 [] ]
+                                    | pages = [ Page n "" 1.0 1.0 [] ]
                                 }
                         in
                         model
-                            |> update (SelectBookmark "8")
+                            |> update (SelectBookmark (String.fromInt n))
                             |> first
                             |> Expect.equal
                                 { model
-                                    | activePage = Just <| Page 8 "" 1.0 1.0 []
+                                    | activePage = Just <| Page n "" 1.0 1.0 []
                                 }
                 , test "should set the activePage to nothing if there's no match" <|
                     \_ ->
@@ -282,19 +280,20 @@ suite =
                                 }
                 ]
             , describe "SelectAnchor"
-                [ test "should send the PlaybackCommand to JS" <|
-                    \_ ->
+                [ fuzz Fuzz.float "should send the PlaybackCommand to JS" <|
+                    \f ->
                         let
                             model =
                                 { emptyModel
                                     | tracks = [ Track 12 "foo" "bar" ]
+                                    , playbackRate = f
                                 }
                         in
                         model
                             |> update (SelectAnchor <| Anchor "abc" 12 4.2 12.12 8.8 Nothing)
                             |> second
                             |> Expect.equal
-                                (Ports.sendPlayback <| Ports.PlaybackCommand "bar" 4.2 1)
+                                (Ports.sendPlayback <| Ports.PlaybackCommand "bar" 4.2 f)
                 , test "should not alter the state" <|
                     \_ ->
                         let
