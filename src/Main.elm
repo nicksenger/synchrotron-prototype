@@ -451,7 +451,6 @@ audioView model =
     audio
         [ id "audio"
         , class <| getInvertedClass "synchrotron__audio" model.inverted
-        , src "courses/vietnamese/dli/audio/1.mp3"
         , controls True
         ]
         []

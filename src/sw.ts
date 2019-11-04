@@ -1,18 +1,27 @@
 const filesToCache = [
-    'index.html',
-    'bundle.css',
-    'bundle.js'
+    "/",
+    '/index.html',
+    '/bundle.css',
+    '/bundle.js',
+    process.env.DATA_PATH as string
 ];
+
 const staticCacheName = `${process.env.TITLE}-v1`;
 
-async function cacheAndReturn(event: FetchEvent) {
+async function fetchWithFallback(event: FetchEvent) {
     const url = event.request.url;
-    const response = await fetch(event.request);
-    const cache = await caches.open(staticCacheName);
-    if (!url.includes('test')) {
+    try {
+        const response = await fetch(event.request);
+        const cache = await caches.open(staticCacheName);
         cache.put(url, response.clone());
+        return response;
+    } catch (_e) {
+        const cached = await caches.match(event.request);
+        if (cached) {
+            return cached;
+        }
+        return fetch(event.request);
     }
-    return response;
 }
 
 const initialize = (service: ServiceWorkerGlobalScope): void => {
@@ -25,17 +34,17 @@ const initialize = (service: ServiceWorkerGlobalScope): void => {
     service.addEventListener('fetch', event => {
         const url = event.request.url;
         if (Boolean(filesToCache.filter(f => url.endsWith(f)).length)) {
-            event.respondWith(cacheAndReturn(event));
+            event.respondWith(fetchWithFallback(event));
         } else {
-            caches.match(event.request).then(cached => {
-                if (cached) {
-                    event.respondWith(cached);
-                } else {
-                    event.respondWith(cacheAndReturn(event));
-                }
-            }).catch(function (error: Error) {
-                // do something when offline
-            });
+            event.respondWith(
+                caches.match(event.request).then(cached => {
+                    if (cached) {
+                        return cached;
+                    } else {
+                        return fetchWithFallback(event);
+                    }
+                })
+            )
         }
     });
 }

@@ -7,10 +7,10 @@ Synchrotron is a progressive web app which sychronizes audio files to text. Exam
 ```sh
 npm test # runs the tests
 npm run watch # runs the app in watch mode
-npm run build --title APP_TITLE --datapath PATH_TO_DATA_DIRECTORY # builds the app
+npm run build -- --title APP_TITLE --datapath PATH_TO_DATA_JSON # builds the app
 ```
 
-To build a Synchrotron app, you must specify a path (`--datapath`) relative to `index.html` containing a `data.json` used to determine the relationship between images, audio, bookmarks and anchors. The `data.json` for your project should have the following format:
+To build a Synchrotron app, you must specify a path (`--datapath`) relative to `index.html` of a JSON file used to determine the relationship between images, audio, bookmarks and anchors. The JSON file for your project should have the following format:
 
 ```ts
 {
