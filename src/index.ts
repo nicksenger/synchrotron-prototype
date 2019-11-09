@@ -50,7 +50,7 @@ setTimeout(() => {
       audio.play();
     })
   }
-}, 200);
+}, 2000);
 
 window.addEventListener('keydown', (ev: KeyboardEvent) => {
   if (ev.shiftKey) {
