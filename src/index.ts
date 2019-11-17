@@ -31,26 +31,26 @@ interface PlaybackCommand {
   rate: number;
 }
 
-setTimeout(() => {
+(new MutationObserver((_mutationsList, observer) => {
   const audio = document.getElementById('audio') as HTMLAudioElement;
   const pageContainer = document.getElementById('page-container');
 
-  if (pageContainer) {
+  if (audio && pageContainer) {
     pageContainer.addEventListener('scroll', reportRelativeHeight);
     app.ports.sendActiveHeight.subscribe((activeHeight: number) => {
       pageContainer.scrollTop = activeHeight * pageContainer.clientWidth;
     });
-  }
 
-  if (audio) {
     app.ports.sendPlayback.subscribe(({ path, time, rate }: PlaybackCommand) => {
       audio.src = path;
       audio.currentTime = time;
       audio.playbackRate = rate;
       audio.play();
-    })
+    });
+
+    observer.disconnect();
   }
-}, 2000);
+})).observe(document.body, { childList: true, subtree: true });
 
 window.addEventListener('keydown', (ev: KeyboardEvent) => {
   if (ev.shiftKey) {
