@@ -24,7 +24,6 @@ import Ports
 import String
 import Svg
 import Svg.Attributes
-import Task
 
 
 main : Program ( String, String ) Model Msg
@@ -112,7 +111,7 @@ emptyModel =
     , loading = True
     , error = Nothing
     , playbackRate = 1
-    , inverted = False
+    , inverted = True
     , admin = False
     , activePage = Nothing
     , scrollEnabled = True
@@ -328,17 +327,16 @@ trackDecoder =
 
 view : Model -> Html Msg
 view model =
-    case model.loading of
-        True ->
-            text "Loading..."
+    if model.loading then
+        text "Loading..."
 
-        False ->
-            case model.error of
-                Just a ->
-                    text a
+    else
+        case model.error of
+            Just a ->
+                text a
 
-                Nothing ->
-                    mainView model
+            Nothing ->
+                mainView model
 
 
 mainView : Model -> Html Msg
@@ -367,13 +365,12 @@ pageView model idx page =
         , style "padding-top" <| String.concat [ String.fromFloat (page.aspectRatio * 100), "%" ]
         , value (String.fromInt idx)
         ]
-        ([ img
+        (img
             [ class <| getInvertedClass "page__image" model.inverted
             , src (getPageUri page model.activePage)
             ]
             []
-         ]
-            ++ List.map (anchorView model.inverted) page.anchors
+            :: List.map (anchorView model.inverted) page.anchors
         )
 
 
@@ -392,7 +389,7 @@ getPageUri page activePage =
 
 
 anchorView : Bool -> Anchor -> Html Msg
-anchorView inverted anchor =
+anchorView _ anchor =
     case anchor.text of
         Just s ->
             a
