@@ -48,6 +48,10 @@ interface PlaybackCommand {
       audio.play();
     });
 
+    app.ports.sendClipboard.subscribe((copyText: string) => {
+      navigator.clipboard.writeText(copyText);
+    });
+
     observer.disconnect();
   }
 })).observe(document.body, { childList: true, subtree: true });
