@@ -52,6 +52,14 @@ interface PlaybackCommand {
       navigator.clipboard.writeText(copyText);
     });
 
+    const anchorId = (new URL(location.href)).searchParams.get("anchor");
+    if (anchorId) {
+      const matchingAnchor = document.getElementById(anchorId);
+      if (matchingAnchor) {
+        matchingAnchor.scrollIntoView();
+      }
+    }
+
     observer.disconnect();
   }
 })).observe(document.body, { childList: true, subtree: true });

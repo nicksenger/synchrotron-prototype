@@ -398,6 +398,7 @@ anchorView _ anchor =
             a
                 [ style "top" <| "calc(" ++ String.fromFloat anchor.top ++ "% - 10px)"
                 , style "left" <| String.fromFloat anchor.left ++ "%"
+                , attribute "id" anchor.id
                 , onClick <| SelectAnchor anchor
                 ]
                 [ text s ]
@@ -406,6 +407,7 @@ anchorView _ anchor =
             div
                 [ style "top" <| String.fromFloat anchor.top ++ "%"
                 , style "left" <| String.fromFloat anchor.left ++ "%"
+                , attribute "id" anchor.id
                 , onClick <| SelectAnchor anchor
                 ]
                 [ Svg.svg
