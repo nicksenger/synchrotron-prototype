@@ -48,9 +48,11 @@ interface PlaybackCommand {
       audio.play();
     });
 
-    app.ports.sendClipboard.subscribe((copyText: string) => {
-      navigator.clipboard.writeText(copyText);
-    });
+    if (history) {
+      app.ports.sendPath.subscribe((uuid: string) => {
+        history.pushState({ anchor: uuid }, uuid, `?anchor=${uuid}`);
+      });
+    }
 
     const anchorId = (new URL(location.href)).searchParams.get("anchor");
     if (anchorId) {

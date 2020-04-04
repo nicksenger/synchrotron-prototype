@@ -16,7 +16,7 @@ port sendActiveHeight : Float -> Cmd msg
 port sendPlayback : PlaybackCommand -> Cmd msg
 
 
-port sendClipboard : String -> Cmd msg
+port sendPath : String -> Cmd msg
 
 
 -- Receive

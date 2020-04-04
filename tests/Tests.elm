@@ -293,7 +293,7 @@ suite =
                             |> update (SelectAnchor <| Anchor "abc" 12 4.2 12.12 8.8 Nothing)
                             |> second
                             |> Expect.equal
-                                (Cmd.batch <| [ Ports.sendPlayback <| Ports.PlaybackCommand "bar" 4.2 f, Ports.sendClipboard "abc" ])
+                                (Cmd.batch <| [ Ports.sendPlayback <| Ports.PlaybackCommand "bar" 4.2 f, Ports.sendPath "abc" ])
                 , test "should not alter the state" <|
                     \_ ->
                         let

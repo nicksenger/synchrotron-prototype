@@ -233,7 +233,7 @@ update msg model =
             ( model
             , Cmd.batch
                 [ Ports.sendPlayback (Ports.PlaybackCommand path a.time model.playbackRate)
-                , Ports.sendClipboard a.id
+                , Ports.sendPath a.id
                 ]
             )
 
